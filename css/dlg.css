@@ -1,0 +1,196 @@
+/* стили для диалогов */
+
+BODY
+{
+	font-family: "Century Gothic" , Futura, Arial, Verdana, sans-serif;
+	background-color: White;
+}
+.menu
+{
+	padding-right: 0px;
+	padding-left: 0px;
+	font-size: 10pt;
+	padding-bottom: 0pt;
+	margin: 0px;
+	color: white;
+	text-indent: 0pt;
+	padding-top: 0px;
+}
+.message
+{
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-bottom: 0pt;
+	margin: 0px,0px,8px,0px;
+	color: white;
+	text-indent: 0pt;
+	padding-top: 0px;
+}
+.messagetext
+{
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-top: 0px;
+	padding-bottom: 0pt;
+	margin: 0px;
+	color: white;
+	text-indent: 0pt;
+}
+.messagebox
+{
+	margin-left: 30pt;
+}
+.updownborder
+{
+	padding-right: 0px;
+	padding-left: 0px;
+	padding-bottom: 0pt;
+	margin: 0px;
+	color: white;
+	text-indent: 0pt;
+	line-height: 0px;
+	padding-top: 0px;
+}
+
+H1
+{
+	margin-top: 10pt;
+	padding-left: 0px;
+	font-weight: lighter;
+	font-size: large;
+	margin-bottom: 8px;
+	padding-bottom: 1px;
+	margin-left: 0pt;
+	padding-top: 0px;
+	border-bottom: red 4px solid;
+	text-align: center;
+}
+H2
+{
+	clear: both;
+	padding-left: 10px;
+	font-weight: lighter;
+	font-size: medium;
+	padding-bottom: 1px;
+	margin: 10pt 0px 4pt;
+	padding-top: 0px;
+	BORDER-BOTTOM: brown 1px solid	text-align: left;
+}
+H3
+{
+	clear: both;
+	display: block;
+	padding-left: 0px;
+	font-weight: lighter;
+	font-size: medium;
+	float: none;
+	padding-bottom: 5px;
+	margin: 10pt 0px 1pt;
+	padding-top: 0px;
+	text-align: center;
+}
+P
+{
+	padding-right: 0px;
+	padding-left: 0px;
+	padding-bottom: 5pt;
+	margin: 0px;
+	text-indent: 30pt;
+	padding-top: 0px;
+	color: #343434;
+}
+.news
+{
+	text-indent: 0pt;
+	padding-bottom: 8pt;
+}
+.games
+{
+	padding-left: 0px;
+	padding-bottom: 0pt;
+	margin: 0px;
+	text-indent: 0pt;
+	padding-top: 0px;
+}
+.links
+{
+	text-indent: 0pt;
+	text-align: right;
+}
+A.menulink:hover, A.message:hover, .selectedmenu
+{
+	border: #A42627 2px solid;
+	color: white;
+	font-style: normal;
+	text-decoration: none;
+}
+A.menulink:link, A.menulink:active, A.menulink:visited, A.message:link, A.message:visited, A.message:active
+{
+	color: white;
+	font-style: normal;
+}
+A.menulink, A.message
+{
+	border-right: gray 2px solid;
+	border-top: gray 2px solid;
+	border-left: gray 2px solid;
+	color: white;
+	border-bottom: gray 2px solid;
+	font-style: normal;
+	text-decoration: none;
+}
+A.gb_a:link, A.gb_a:hover
+{
+	font-size: 80%;
+	color: #343434;
+	font-style: normal;
+	text-decoration: none;
+}
+LI
+{
+	padding-bottom: 5pt;
+	margin: 0px 0px 0px;
+	padding-top: 0px;
+}
+UL
+{
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0pt;
+	padding-top: 0px;
+	list-style-type: square;
+	text-indent:0;
+}
+OL
+{
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0pt;
+	padding-top: 0px;
+	text-indent:0;
+}
+STRONG
+{
+	font-weight: normal;
+	font-style: italic;
+}
+.textarea
+{
+	font-size: 8pt;
+}
+BLOCKQUOTE
+{
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+	margin-left: 60px;
+	text-indent:0;
+	padding-top: 0px;
+}
+FORM.buy
+{
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	text-indent: 0pt;
+	text-align: center;
+}

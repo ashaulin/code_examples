@@ -1,0 +1,29 @@
+# Крон для сервера передних страниц justclick.ru и staffs (vs03.justclick.ru)
+# В основном выполняются действия по общим для всех серверов таблицам и данным
+
+MAILTO='errors@justclick.ru'
+
+0 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/unlim_prolongation.php
+
+* * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/cron_task_math.php > /dev/null 2>&1
+
+0 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/clearSpamMails.php
+
+#*/10 * * * * /home/justclick/svncheck.sh
+#*/5 * * * * /home/justclick/monit
+#13 * * * * find /home/justclick/htdocs/errors/ -mtime +1 -name "5*.txt" -delete
+
+20 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats justclick --days=5
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats catalog
+
+# Автовебинары. Каждые день в 4 часа биллинг. Считает и списывает с юзеров деньги за просмотр вебинаров их клиентами
+0 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh WbrPayments calculate
+
+# Заполнение таблицы статистики каждый день в 1 час. Для страниц /staffs/platniki и /staffs/platniki/stats
+5 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats platniki
+
+# Контролируем работу консьюмеров
+*/5 * * * * cd '/home/justclick/htdocs' && /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %>  /home/justclick/htdocs/backend/bin/run_killed_consumers.sh
+
+# Загрузка комиссии PayU по API
+30 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh LoadFromPayway payu

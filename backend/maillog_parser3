@@ -1,0 +1,227 @@
+#!/usr/bin/perl
+
+use DBI;
+use Data::Dumper;
+
+$my_host = `hostname`;
+$my_host =~ s/\s+$//;
+
+$start_time = time;
+
+$dsn_1 = 'DBI:mysql:justclick_ru:localhost';
+$db_user_name_1 = 'justclick_ru';
+$db_password_1 = 'GLfIXDH5';
+$dbh_1 = DBI->connect($dsn_1, $db_user_name_1, $db_password_1) or die $DBI::errstr;
+
+$dsn_2 = 'DBI:mysql:justclick_ru:ds14.justclick.ru';
+$db_user_name_2 = 'justclick_logs';
+$db_password_2 = 'DfkzaLHb41uYyp2J';
+$dbh_2 = DBI->connect($dsn_2, $db_user_name_2, $db_password_2) or die $DBI::errstr;
+
+while (time - $start_time < 290) {
+    @log_ids = ();
+    @message_rows = ();
+    @status_rows = ();
+
+    $sth = $dbh_1->prepare(qq{SELECT * FROM SystemEvents LIMIT 100});
+    $sth->execute();
+
+    while ( @row = $sth->fetchrow_array ) {
+        $line = $row[7];
+        $line =~ s/^\s+//;
+        @arr = split(": ", $line, 2);
+        $mess_id = $arr[0];
+        $msg = $arr[1];
+        $msg =~ s/^\s+//;
+        $msg =~ s/\s+$//;
+
+        push @log_ids, $dbh_1->quote($row[0]);
+
+        if ($row[20] =~ m/^(dovecot|opendkim)/i) {
+            next;
+        }
+        if ($row[20] =~ m/\/(master|qmgr|smtpd|pickup|bounce|anvil|scache)/i) {
+            next;
+        }
+
+        if ($msg =~ m/^\s?message-id=<([a-zA-Z0-9\.\-_]+)@(.*)>/im) {
+            $ID = $1;
+            $mesrow{'jc_host'} = $2;
+            if ($ID =~ m/a(\d+)l(\d+)t(\d+)/) {
+                $mesrow{'message_type'} = 'anons';
+                $mesrow{'message_id'} = $1;
+                $mesrow{'lead_id'} = $2;
+
+                $sql = sprintf "(%s, %d, %d, %s, %s, %s, %s, %s, UNIX_TIMESTAMP())",
+                    $dbh_2->quote($mesrow{'message_type'}),
+                    $mesrow{'message_id'},
+                    $mesrow{'lead_id'},
+                    $dbh_2->quote($mesrow{'jc_host'}),
+                    $dbh_2->quote($my_host),
+                    $dbh_2->quote($mess_id),
+                    $dbh_2->quote('sent'),
+                    $dbh_2->quote('');
+                push @message_rows, $sql;
+            }
+            elsif ($ID =~ m/s(\d+)l(\d+)t(\d+)/) {
+                $mesrow{'message_type'} = 'serial';
+                $mesrow{'message_id'} = $1;
+                $mesrow{'lead_id'} = $2;
+
+                $sql = sprintf "(%s, %d, %d, %s, %s, %s, %s, %s, UNIX_TIMESTAMP())",
+                    $dbh_2->quote($mesrow{'message_type'}),
+                    $mesrow{'message_id'},
+                    $mesrow{'lead_id'},
+                    $dbh_2->quote($mesrow{'jc_host'}),
+                    $dbh_2->quote($my_host),
+                    $dbh_2->quote($mess_id),
+                    $dbh_2->quote('sent'),
+                    $dbh_2->quote('');
+                push @message_rows, $sql;
+            }
+        }
+        elsif ($msg =~ m/dsn=(\d\.\d\.\d),\s+status=([\S]+)\s?\((.+)\)/im) {
+            $s = $2;
+            $d = $1;
+            $t = $3;
+
+            if ($s eq 'sent') {
+                $statrow{'message_status'} = 'sent';
+                $statrow{'error_description'} = '';
+            }
+            elsif ($t =~ m/spam/i) {
+                $statrow{'message_status'} = 'spam';
+                $statrow{'error_description'} = $t;
+            }
+            elsif ($t =~ m/full/i || $t =~ m/quota/i || $t =~ m/mailbox size exceeded/i) {
+                $statrow{'message_status'} = 'full';
+                $statrow{'error_description'} = '';
+            }
+            elsif ($s eq 'bounced' && $t =~ m/loops back to myself/i) {
+                # Skips loopback message
+            }
+            elsif (
+                    $s eq 'bounced'
+                    && (
+                        $t =~ m/Host or domain name not found. Name service error for name/i
+                        || $t =~ m/550 Message was not accepted -- invalid mailbox./i
+                        || $t =~ m/No such user/i
+                        || $t =~ m/This user doesn't have a yahoo.com account/i
+                        || $t =~ m/does not exist/i
+                        || $t =~ m/Account blocked due to inactivity/i
+                        || $t =~ m/550 Addresses failed:/i
+                        || $t =~ m/Recipient address rejected: Account closed/i
+                        || $t =~ m/Recipient address rejected: Account locked by abuse team/i
+                        || $t =~ m/Recipient address rejected: Your emails has been returned because the intented recipient's email account has been suspended./i
+                        || $t =~ m/550 Mailbox is frozen./i
+                        || $t =~ m/550 5.2.1 The email account that you tried to reach is disabled./i
+                        || $t =~ m/550 no mailbox by that name is currently available/i
+                        || $t =~ m/User not found/i
+                        || $t =~ m/550 non-existent or disabled recipient/i
+                        || $t =~ m/550 5.1.1 unknown or illegal alias/i
+                        || $t =~ m/553 We do not relay without RFC2554 authentication/i
+                        || $t =~ m/5.1.0 Address rejected/i
+                        || $t =~ m/550 Mailbox not found./i
+                        || $t =~ m/550 User banned/i
+                        || $t =~ m/550 No such person at this address/i
+                        || $t =~ m/Recipient address rejected: Account deleted by user/i
+                        || $t =~ m/550 5.1.1 Bad destination mailbox address/i
+                        || $t =~ m/Recipient address rejected: aol.co.uk/i
+                        || $t =~ m/Recipient address rejected: User unknown/i
+                        || $t =~ m/unknown user account/i
+                        || $t =~ m/Unknown user for this domain/i
+                        || $t =~ m/550 Mailbox unavailable/i
+                        || $t =~ m/550 5.7.1 Unable to relay/i
+                        || $t =~ m/501 Bad address syntax./i
+                        || $t =~ m/550 Unrouteable address/i
+                        || $t =~ m/550 No such recipient/i
+                        || $t =~ m/550 No thank you rejected: Account Unavailable: Possible Forgery/i
+                        || $t =~ m/550 rejected: Unknown recipient/i
+                        || $t =~ m/Relay access denied/i
+                        || $t =~ m/550 relay not permitted/i
+                        || $t =~ m/invalid recipient/i
+                        || $t =~ m/554 5.7.1 Reject due to reject_unknown_rcpts restriction/i
+                        || $t =~ m/Recipient address rejected: Access denied/i
+                        || $t =~ m/550 5.7.1 This message is blocked due to security reason/i
+                        || $t =~ m/Recipient address rejected: User is suspended/i
+                        || $t =~ m/This account has been disabled or discontinued/i
+                        || $t =~ m/Recipient address rejected: aol.com/i
+                        || $t =~ m/553 5.1.2 The address specified is not a valid RFC-5321 address/i
+                        || $t =~ m/Recipient not found/i
+                        || $t =~ m/Name service error for name=/i
+                        || $t =~ m/Recipient unknown/i
+                        || $t =~ m/550 5.1.1 Sorry, no mailbox here by that name/i
+                        || $t =~ m/554 delivery error: dd This user doesn't have a /i
+                        || $t =~ m/Recipient address rejected: user doesn't exist/i
+                        || $t =~ m/550 Account is not active/i
+                        || $t =~ m/553 sorry, that user not exists or domain isn't allowed to be relayed thru this MTA/i
+                        || $t =~ m/503 Valid RCPT command must precede DATA/i
+                        || $t =~ m/prohibited. We do not relay/i
+                        || $t =~ m/... User not local/i
+                        || $t =~ m/Relaying denied/i
+                        || $t =~ m/550-The account has been suspended for inactivity/i
+                        || $t =~ m/550 "User inactive"/i
+                        || $t =~ m/Recipient address rejected: Mailbox disabled/i
+                        || $t =~ m/511 sorry, no mailbox here by that name/i
+                        || $t =~ m/Recipient address rejected: undeliverable address/i
+                        || $t =~ m/550 5.2.1 Mailbox unavailable./i
+                        || $t =~ m/In my mailserver not stored this user/i
+                        || $t =~ m/550 This email address is blocked/i
+                        || $t =~ m/550 Unknown local user/i
+                        || $t =~ m/Error 60: No mailbox/i
+                        || $t =~ m/550 5.1.1 Unknown mailbox/i
+                        || $t =~ m/sorry, no mailbox here by that name/i
+                    )
+            ) {
+                $statrow{'message_status'} = 'bad';
+                $statrow{'error_description'} = $t;
+            }
+            else {
+                $statrow{'message_status'} = 'fail';
+                $statrow{'error_description'} = $t;
+            }
+
+            $sql = sprintf "(%s, %d, %d, %s, %s, %s, %s, %s, UNIX_TIMESTAMP())",
+                $dbh_2->quote('anons'),
+                0,
+                0,
+                $dbh_2->quote(''),
+                $dbh_2->quote($my_host),
+                $dbh_2->quote($mess_id),
+                $dbh_2->quote($statrow{'message_status'}),
+                $dbh_2->quote($statrow{'error_description'});
+            push @status_rows, $sql;
+        }
+    }
+
+    $count = @message_rows;
+    if ($count) {
+        # Replace new rows
+        $sql = join ', ', @message_rows;
+        $sql = "INSERT INTO JC_mail_logs VALUES $sql ON DUPLICATE KEY UPDATE message_type=VALUES(message_type), message_id=VALUES(message_id), lead_id=VALUES(lead_id), jc_host=VALUES(jc_host), log_time=VALUES(log_time)";
+        $rows = $dbh_2->do($sql);
+    }
+    $count = @status_rows;
+    if ($count) {
+        # Replace new rows
+        $sql = join ', ', @status_rows;
+        $sql = "INSERT INTO JC_mail_logs VALUES $sql ON DUPLICATE KEY UPDATE message_status=VALUES(message_status), error_description=VALUES(error_description), log_time=VALUES(log_time)";
+        $rows = $dbh_2->do($sql);
+    }
+
+
+    $count = @log_ids;
+    if ($count) {
+        # Delete rows in SystemEvents table
+        $sql = join ', ', @log_ids;
+        $sql = "DELETE FROM SystemEvents WHERE ID IN ($sql)";
+        $dbh_1->do($sql);
+    }
+
+    if (!$count) {
+        sleep(10);
+    }
+}
+
+$dbh_1->disconnect;
+$dbh_2->disconnect;

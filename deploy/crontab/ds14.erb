@@ -1,0 +1,359 @@
+# Крон для сервера рассылающего почту со всех других серверов (ds14.justclick.ru)
+
+MAILTO='errors@justclick.ru'
+
+# проверяем доступность серверов для отправки почты
+3,13,23,33,43,53 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/mirrors/vs04/current/backend/check_servers.php
+
+# проверяем, не зависли ли скрипты отправки почты
+*/10 * * * * /bin/find /home/justclick/mirrors -name "serial_pids.pid" -mmin +15
+
+# проверка ошибок отправки
+*/10 * * * * /bin/find /home/justclick/mirrors -name "anonsd.log" | xargs grep ERROR
+
+# удаляем устаревшие письма об ошибках от почтовых серверов
+0 0 * * * find /home/justclick/htdocs/data/fbl/done/ -type f -mtime +7 -delete
+30 0 * * * find /home/justclick/htdocs/data/bounce/done/ -type f -mtime +7 -delete
+
+# Обновление Geo баз
+0 0 1 * * /home/justclick/mirrors/vs04/current/bin/geo_updater.sh
+
+# Мониторинг стабильности рассылки
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh checkDelay check
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh checkDelay check
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh checkDelay check
+1,6,11,16,21,26,31,36,41,46,51,56 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh checkDelay check
+1,6,11,16,21,26,31,36,41,46,51,56 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh checkDelay check
+1,6,11,16,21,26,31,36,41,46,51,56 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh checkDelay check
+2,7,12,17,22,27,32,37,42,47,52,57 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh checkDelay check
+2,7,12,17,22,27,32,37,42,47,52,57 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh checkDelay check
+2,7,12,17,22,27,32,37,42,47,52,57 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh checkDelay check
+3,8,13,18,23,28,33,38,43,48,53,58 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh checkDelay check
+3,8,13,18,23,28,33,38,43,48,53,58 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh checkDelay check
+
+
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh mailUtilsImap bounce --conf=/home/justclick/mirrors/b1.php
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh mailUtilsImap bounce --conf=/home/justclick/mirrors/b2.php
+
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh mailUtilsImap fbl --conf=/home/justclick/mirrors/f1.php
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh mailUtilsImap fbl --conf=/home/justclick/mirrors/f2.php
+
+0 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh mailUtils bounce --host=vs04.justclick.ru
+0 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh mailUtils bounce --host=www-shard01-0-9.justclick.ru
+0 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh mailUtils bounce --host=www-shard02-a.justclick.ru
+0 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh mailUtils bounce --host=www-shard03-bd.justclick.ru
+0 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh mailUtils bounce --host=www-shard04-cef.justclick.ru
+0 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh mailUtils bounce --host=www-shard05-ghi.justclick.ru
+0 6 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh mailUtils bounce --host=www-shard06-kl.justclick.ru
+0 7 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh mailUtils bounce --host=www-shard07-jm.justclick.ru
+0 8 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh mailUtils bounce --host=www-shard08-nop.justclick.ru
+0 9 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh mailUtils bounce --host=www-shard09-s.justclick.ru
+0 10 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh mailUtils bounce --host=www-shard10-qrtu.justclick.ru
+0 11 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh mailUtils bounce --host=www-shard11-vwxyz.justclick.ru
+
+30 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh mailUtils fbl --host=vs04.justclick.ru
+30 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh mailUtils fbl --host=www-shard01-0-9.justclick.ru
+30 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh mailUtils fbl --host=www-shard02-a.justclick.ru
+30 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh mailUtils fbl --host=www-shard03-bd.justclick.ru
+30 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh mailUtils fbl --host=www-shard04-cef.justclick.ru
+30 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh mailUtils fbl --host=www-shard05-ghi.justclick.ru
+30 6 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh mailUtils fbl --host=www-shard06-kl.justclick.ru
+30 7 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh mailUtils fbl --host=www-shard07-jm.justclick.ru
+30 8 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh mailUtils fbl --host=www-shard08-nop.justclick.ru
+30 9 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh mailUtils fbl --host=www-shard09-s.justclick.ru
+30 10 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh mailUtils fbl --host=www-shard10-qrtu.justclick.ru
+30 11 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh mailUtils fbl --host=www-shard11-vwxyz.justclick.ru
+
+# Определение города подписчика по IP
+1,31 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh LeadCity getByIP
+3,33 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh LeadCity getByIP
+5,35 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh LeadCity getByIP
+7,37 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh LeadCity getByIP
+10,40 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh LeadCity getByIP
+12,42 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh LeadCity getByIP
+14,44 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh LeadCity getByIP
+26,46 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh LeadCity getByIP
+28,48 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh LeadCity getByIP
+30,50 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh LeadCity getByIP
+33,53 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh LeadCity getByIP
+37,57 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh LeadCity getByIP
+
+
+# Автоочистка базы от неактивных подписчиков
+0 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh UnsubLeads checkLeads
+0 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+5 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh UnsubLeads checkLeads
+5 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+10 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh UnsubLeads checkLeads
+10 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+15 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh UnsubLeads checkLeads
+15 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+20 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh UnsubLeads checkLeads
+20 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+25 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh UnsubLeads checkLeads
+25 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+30 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh UnsubLeads checkLeads
+30 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+35 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh UnsubLeads checkLeads
+35 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+40 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh UnsubLeads checkLeads
+40 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+45 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh UnsubLeads checkLeads
+45 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+50 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh UnsubLeads checkLeads
+50 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+55 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh UnsubLeads checkLeads
+55 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+
+# Mantis task 947
+2 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh rassilkiStats update --users=223,740,752,4006,4791,5461,12912,18735,24130,29614
+7 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh rassilkiStats update --letters=0123456789 --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+12 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh rassilkiStats update --letters=a --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+17 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh rassilkiStats update --letters=bd --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+22 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh rassilkiStats update --letters=cef --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+27 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh rassilkiStats update --letters=ghi --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+32 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh rassilkiStats update --letters=kl --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+37 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh rassilkiStats update --letters=jm --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+42 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh rassilkiStats update --letters=nop --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+47 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh rassilkiStats update --letters=s --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+52 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh rassilkiStats update --letters=qrtu --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+57 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh rassilkiStats update --letters=vwxyz --exclude=223,740,752,4006,4791,5461,12912,18735,24130,29614
+
+
+# Statistika po podpiskam (bt-task 138)
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh subscribe stats day 0123456789
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh subscribe stats week 0123456789
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh subscribe stats month 0123456789
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh subscribe stats day a
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh subscribe stats week a
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh subscribe stats month a
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh subscribe stats day bd
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh subscribe stats week bd
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh subscribe stats month bd
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh subscribe stats day cef
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh subscribe stats week cef
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh subscribe stats month cef
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh subscribe stats day ghi
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh subscribe stats week ghi
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh subscribe stats month ghi
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh subscribe stats day kl
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh subscribe stats week kl
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh subscribe stats month kl
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh subscribe stats day jm
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh subscribe stats week jm
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh subscribe stats month jm
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh subscribe stats day nop
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh subscribe stats week nop
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh subscribe stats month nop
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh subscribe stats day s
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh subscribe stats week s
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh subscribe stats month s
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh subscribe stats day qrtu
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh subscribe stats week qrtu
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh subscribe stats month qrtu
+
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh subscribe stats day vwxyz
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh subscribe stats week vwxyz
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh subscribe stats month vwxyz
+
+
+
+#vs04
+57 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/mark_finished_anonses.php
+58 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/cache_anons.php shard1
+59 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/mailru.php vs04.justclick.ru
+00,30 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/vs04/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh sms send vs04
+27,55 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh sms getstatus vs04
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/vs04/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard01
+1 */6 * * *   /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/mark_finished_anonses.php
+2 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/cache_anons.php shard1
+3 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/mailru.php www-shard01-0-9.justclick.ru
+01,31 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard01-0-9/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh sms send shard01
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh sms getstatus shard01
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard01-0-9/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard02
+5 */6 * * *   /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/mark_finished_anonses.php
+7 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/cache_anons.php shard1
+8 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/mailru.php www-shard02-a.justclick.ru
+02,32 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard02-a/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh sms send shard02
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh sms getstatus shard02
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard02-a/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard03
+10 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/mark_finished_anonses.php
+12 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/cache_anons.php shard1
+13 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/mailru.php www-shard03-bd.justclick.ru
+03,33 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard03-bd/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh sms send  shard03
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh sms getstatus shard03
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard03-bd/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard04
+15 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/mark_finished_anonses.php
+17 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/cache_anons.php shard1
+18 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/mailru.php www-shard04-cef.justclick.ru
+04,34 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard04-cef/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh sms send shard04
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh sms getstatus shard04
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard04-cef/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard05
+20 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/mark_finished_anonses.php
+22 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/cache_anons.php shard1
+23 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/mailru.php www-shard05-ghi.justclick.ru
+05,35 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard05-ghi/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh sms send shard05
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh sms getstatus shard05
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard05-ghi/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard06
+25 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/mark_finished_anonses.php
+27 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/cache_anons.php shard1
+29 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/mailru.php www-shard06-kl.justclick.ru
+06,36 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard06-kl/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh sms send shard06
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh sms getstatus shard06
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard06-kl/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard07
+31 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/mark_finished_anonses.php
+33 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/cache_anons.php shard1
+34 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/mailru.php www-shard07-jm.justclick.ru
+07,37 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard07-jm/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh sms send shard07
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh sms getstatus shard07
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard07-jm/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard08
+36 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/mark_finished_anonses.php
+38 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/cache_anons.php shard1
+39 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/mailru.php www-shard08-nop.justclick.ru
+08,38 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard08-nop/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh sms send shard08
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh sms getstatus shard08
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard08-nop/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard09
+41 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/mark_finished_anonses.php
+43 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/cache_anons.php shard1
+44 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/mailru.php www-shard09-s.justclick.ru
+09,39 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard09-s/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh sms send shard09
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh sms getstatus shard09
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard09-s/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard10
+46 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/mark_finished_anonses.php
+48 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/cache_anons.php shard1
+49 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/mailru.php www-shard10-qrtu.justclick.ru
+10,40 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard10-qrtu/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh sms send shard10
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh sms getstatus shard10
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard10-qrtu/current/backend/bin/cli.sh sms exclude_not_delivered
+
+
+#www-shard11
+51 */6 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/mark_finished_anonses.php
+53 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/cache_anons.php shard1
+55 * * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/mailru.php www-shard11-vwxyz.justclick.ru
+11,41 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bill_cancel.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bill_create.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+1 * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/lead_confirm.php
+*/15 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/rss.php
+* * * * *     /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/mirrors/www-shard11-vwxyz/current/backend/cron_task_math.php > /dev/null 2>&1
+*/10 * * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh sms send shard11
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh sms getstatus shard11
+11 5 * * *    /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/mirrors/www-shard11-vwxyz/current/backend/bin/cli.sh sms exclude_not_delivered

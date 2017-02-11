@@ -1,0 +1,33 @@
+set :stage_config_path, 'servers'
+set :deploy_config_path, 'deploy.rb'
+
+# Load DSL and set up stages
+require 'capistrano/setup'
+
+# Load system libs
+require 'shellwords'
+
+# Include default deployment tasks
+
+require 'capistrano/deploy'
+require 'capistrano/console'
+require 'capistrano/composer'
+require 'capistrano/symfony'
+require 'capistrano/file-permissions'
+
+load 'recipes/php.rb'
+load 'recipes/nginx.rb'
+load 'recipes/doctrine.rb'
+load 'recipes/mysql_test.rb'
+load 'recipes/linked_files.rb'
+load 'recipes/amqp.rb'
+load 'recipes/crontab.rb'
+load 'recipes/jenkins.rb'
+load 'recipes/test_db.rb'
+load 'recipes/daemon.rb'
+load 'recipes/mailing.rb'
+load 'recipes/assets.rb'
+load 'recipes/recover_configs.rb'
+load 'recipes/cvs_rev.rb'
+
+load 'deploy.rb'

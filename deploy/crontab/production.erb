@@ -1,0 +1,54 @@
+
+# Крон для рабочих пользовательских серверов (www-shard01 ... 11, vs04)
+
+MAILTO='errors@justclick.ru'
+
+13 * * * * find /home/justclick/htdocs/errors/ -mtime +1 -name "5*.txt" -delete
+
+# Partner Stat
+# exclude=1 else admin stat = 0
+28 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats partner --days=5 --exclude=1
+28 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats fix --days=5000
+
+# Открепление невалидных доменов
+# На ds14 нельзя, так как проверяется IP сервера, на котором запускается скрипт
+0 4 * * 7 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh InvalidUserDomains check
+
+# Удаление несуществующих по базе JC_mail_logs
+8,23,38,53 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh leadInvalid setinvalid 15 10
+
+#Автоимпорт расходов из Яндекс.Директ для utm-меток
+15 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh import yandex
+
+# Очистка таблиц активности
+0 8 * * 6 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh Activity removeOld
+
+#Обновление статистики и рейтинга каталога партнерок JustClick
+0 6 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats newStats
+
+# Удаление подписчиков, которые не принадлежат ни одной группе
+0 4 * * 6 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh LeadInvalid removeLeadsWithoutGroup
+
+# Обновление Geo баз
+0 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/geo_updater.sh
+
+# Обновление автогрупп неактивных
+0 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh AutogroupActivity update >> /home/justclick/htdocs/data/logs/autogroup_activity.log
+
+# Контролируем работу консьюмеров
+*/5 * * * * cd '/home/justclick/htdocs' && /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %>  /home/justclick/htdocs/backend/bin/run_killed_consumers.sh
+
+# JustPay заявка со статусом "Подключен, ожидание оригиналов" > 14 дней висит - отключаем
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh CheckJustpayConfig check
+
+# Блокировка за спам #1727 -> #4502
+16 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh Spam blockSpamUsers
+
+# Синхронизация статусов отправленных писем #4052
+*/5 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh Spam synchronizeLeads
+
+# ClearOldCcTaskEditings #3520
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh ClearOldCcTaskEditings
+
+# Оплаты рекуррентных счетов, снова перемещены на шарды по причине задвоения платежей. НЕ ПЕРЕМЕЩАТЬ на ds14
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh Recurrent pay

@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://jcstage.co/" />
+<title>регистр</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">регистр</td></tr>
+</thead><tbody>
+<tr>
+    <td>echo</td>
+    <td>1. Регистрация. Регистрация нового аккаунта/ Проверка содержания письма и наличие ссылок/ Попадание мейла в нужные группы в аккуант admin и аккаунт gora4o с соответвующими метками/ Удаление аккаунта</td>
+    <td></td>
+</tr>
+<tr>
+    <td>store</td>
+    <td>javascript{Math.random().toString(36).substring(8)}</td>
+    <td>loginpassname</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${loginpassname}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>store</td>
+    <td>javascript{Math.floor(Math.random()*1111111)}</td>
+    <td>tel</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${tel}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>store</td>
+    <td>javascript{Math.random().toString(36).substring(8)+&quot;@&quot;+Math.random().toString(36).substring(8)+&quot;.ru&quot;}</td>
+    <td>mail</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${mail}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logout</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Развивайте инфобизнес и зарабатывайте в сети :: jcstage.co</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>//a[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>//a[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=register-login</td>
+    <td>${loginpassname}</td>
+</tr>
+<tr>
+    <td>fireEvent</td>
+    <td>id=register-login</td>
+    <td>keyup</td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=user_password</td>
+    <td>${loginpassname}</td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=user_full_name</td>
+    <td>${loginpassname}</td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=user_email</td>
+    <td>${mail}</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>//input[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=user_phone</td>
+    <td>буквы</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>//input[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=user_phone</td>
+    <td>${tel}</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>id=popup_domination_lightbox_close</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>//input[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>//input[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>10000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Управление тарифом :: ${loginpassname} :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>title</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${title}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logout/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleRegistr</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleRegistr}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>//a[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logon/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleLogin</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleLogin}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=user_name-input</td>
+    <td>admin</td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=password-input</td>
+    <td>1qaz2wsx</td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>css=input[type=&quot;submit&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>css=input[type=&quot;submit&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleAdmin</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleAdmin}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/staff/upb/?e=</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Переход в почтовый ящик пользователя [jcstage.co]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=e</td>
+    <td>${mail}</td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>css=input.CmsFormSubmit</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>10000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>link=[jcstage.co] Регистрация нового пользователя</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyTextPresent</td>
+    <td>Ваш логин: ${loginpassname}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyTextPresent</td>
+    <td>Ваш пароль: ${loginpassname}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyTextPresent</td>
+    <td>Ваш пароль: ${loginpassname}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyTextPresent</td>
+    <td>&gt;&gt; НАЖМИТЕ, ЧТОБЫ НАЧАТЬ ОБУЧЕНИЕ &lt;&lt;</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/rassilki/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Группы подписчиков :: admin :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/rassilki/leads/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Подписчики :: admin :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>css=span.in.cw110</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>css=span.in.cw110</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>name=filter[kw]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=filter[kw]</td>
+    <td>${mail}</td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>id=find_item</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>id=find_item</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyElementPresent</td>
+    <td>//tr[td[text()=&quot;jc_reg&quot;]][*/a[text()=&quot;${mail}&quot;]][*/span[text()=&quot;auto_justclick_news&quot;]]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyElementPresent</td>
+    <td>//tr[td[text()=&quot;jc_reg&quot;]][*/a[text()=&quot;${mail}&quot;]][*/span[text()=&quot;auto_justclick_promo&quot;]]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyElementPresent</td>
+    <td>//tr[td[text()=&quot;jc_reg&quot;]][*/a[text()=&quot;${mail}&quot;]][*/span[text()=&quot;auto_justclick_learn&quot;]]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>1000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logout/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>//a[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logon/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=user_name-input</td>
+    <td>gora4o</td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=password-input</td>
+    <td>12345678</td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>css=input[type=&quot;submit&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>css=input[type=&quot;submit&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>15000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Статистика продаж :: gora4o :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleGora4o</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleGora4o}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/rassilki/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Группы подписчиков :: gora4o :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>15000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/rassilki/leads/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Подписчики :: gora4o :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>15000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>css=span.in.cw110</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>css=span.in.cw110</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>name=filter[kw]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=filter[kw]</td>
+    <td>${mail}</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>id=find_item</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyElementPresent</td>
+    <td>//tr[td[text()=&quot;jc_reg&quot;]][*/a[text()=&quot;${mail}&quot;]][*/span[text()=&quot;infobiz&quot;]]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>waitForText</td>
+    <td>//article[@id='main-view']/div[6]/div/table/tbody/tr[4]/td[3]</td>
+    <td>admin</td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logout/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>//a[@class=&quot;a-reg&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>http://jcstage.co/access/logon/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=user_name-input</td>
+    <td>admin</td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>id=password-input</td>
+    <td>1qaz2wsx</td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>css=input[type=&quot;submit&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>clickAndWait</td>
+    <td>css=input[type=&quot;submit&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>15000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleAdmin2</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleAdmin2}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertTitle</td>
+    <td>Статистика продаж :: admin :: justclick.ru</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/staffs/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/staffs/access/users/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleStaffUser1</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleStaffUser1}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>15000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=filter[email]</td>
+    <td>${mail}</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>//a[@name=&quot;find&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>pause</td>
+    <td>15000</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//title</td>
+    <td>titleStaffUser2</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${titleStaffUser2}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>Проверяю результаты фильтра</td>
+    <td></td>
+</tr>
+<tr>
+    <td>storeText</td>
+    <td>//a/nobr</td>
+    <td>mailuser</td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>${mailuser}</td>
+    <td></td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>Проверяю наличие элемента</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertElementPresent</td>
+    <td>//a[@class=&quot;delete-item&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>следующий шаг удаление</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>//a[@class=&quot;delete-item&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>assertConfirmation</td>
+    <td>Вы хотите удалить этот объект?</td>
+    <td></td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>Проверяю удалился ли аккаунт</td>
+    <td></td>
+</tr>
+<tr>
+    <td>open</td>
+    <td>/staffs/access/users/</td>
+    <td></td>
+</tr>
+<tr>
+    <td>type</td>
+    <td>name=filter[email]</td>
+    <td>${mail}</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>//a[@name=&quot;find&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>verifyElementNotPresent</td>
+    <td>//a[@class=&quot;blue&quot;]/nobr[text()=&quot;${mail}&quot;]</td>
+    <td></td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>Аккаунтах удален (выдача фильтра пуста)</td>
+    <td></td>
+</tr>
+<tr>
+    <td>echo</td>
+    <td>конец теста</td>
+    <td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

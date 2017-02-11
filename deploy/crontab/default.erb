@@ -1,0 +1,54 @@
+# Крон для тестовых серверов (justclicktest.info, jcdev.co, jcdev.info, jcstage.co)
+
+# sms_send
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh sms send
+# sms_getstatus
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh sms getstatus
+# exclude_not_delivered
+11 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh sms exclude_not_delivered
+# rassilkiStats_update
+0 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh rassilkiStats update --letters=0123456789abcdefghijklmnopqrstuvwxyz
+# purge_errors
+13 * * * * find <%= release_path %>/errors/ -mtime +7 -name '*.txt' -delete
+# mail_notify.php
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> php <%= release_path %>/backend/mail_notify.php --letters=0123456789abcdefghijklmnopqrstuvwxyz
+# bill_create.php
+*/5 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> php <%= release_path %>/backend/bill_create.php
+# bill_cancel.php
+* * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> php <%= release_path %>/backend/bill_cancel.php
+# unlim_prolongation.php
+0 8 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> php <%= release_path %>/backend/unlim_prolongation.php
+# Recurrent_pay
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh Recurrent pay
+# fillStats_partner
+20 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh fillStats partner
+# fillStats_justclick
+40 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh fillStats justclick
+# fillStats_catalog
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh fillStats catalog
+# UnsubLeads_checkLeads
+0 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh UnsubLeads checkLeads
+# UnsubLeads_checkUnsubLeads
+0 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+# cron_task_math.php
+*/5 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> php <%= release_path %>/backend/cron_task_math.php > /dev/null 2>&1
+# WbrPayments_calculate
+0 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh WbrPayments calculate
+# fillStats_platniki
+10 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh fillStats platniki
+# fillStats_partner
+20 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh fillStats partner
+# fillStats_justclick
+40 2 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh fillStats justclick
+# ClearOldCcTaskEditings #3520
+*/45 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh ClearOldCcTaskEditings
+
+<% if webinar_path %>
+# Wbr_remindEmail
+* * * * * cd <%= webinar_path %> && php symfony webinar:remindEmail > /dev/null
+# Wbr_chatMessagesLog
+*/10 * * * * cd <%= webinar_path %> && php symfony webinar:chatMessagesLog > /dev/null 2>&1
+<% end %>
+
+# Run killed consumers
+*/5 * * * * cd <%= release_path %> && /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> backend/bin/run_killed_consumers.sh

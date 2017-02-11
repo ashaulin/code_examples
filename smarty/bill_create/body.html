@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title></title>
+    </head>
+    <body>
+        <p style="color: rgb(204, 0, 0);font-size:130%;font-weight:bold;">{$bill_first_name|escape}, вы выписали счет №{$bill_id}.</p>
+		<p>Состав счета:</p><ol>
+		{foreach from=$goods item="good"}
+		<li>{$good.good_title}</li>
+		{/foreach}</ol>
+        <b>Сумма для оплаты:</b> <nobr>{$bill_sum|round:"2"} руб.</nobr></p>
+        <p>Чтобы выбрать способ оплаты и оплатить данный счет, нажмите здесь:<br />
+		<a href="http://{$USER_DOMAIN}/bill/?id={$bill_id}&crc={$crc}">http://{$USER_DOMAIN}/bill/?id={$bill_id}&crc={$crc}</a></p>
+        <p>Если вы не желаете оплачивать данный счет, нажмите на ссылку:<br />
+		<a href="http://{$USER_DOMAIN}/bill/cancel/?id={$bill_id}&crc={$crc}">http://{$USER_DOMAIN}/bill/cancel/?id={$bill_id}&crc={$crc}</a></p>
+    </body>
+</html>

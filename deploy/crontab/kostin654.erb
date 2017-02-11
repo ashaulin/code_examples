@@ -1,0 +1,73 @@
+# Крон для рабочего тестового сервера с единственным пользователем kostin654 (vs33.justclick.ru)
+
+# Statistika po podpiskam (bt-task 138)
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh subscribe stats day jm
+30 0 * * 1 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh subscribe stats week jm
+45 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh subscribe stats month jm
+# Mantis task 947
+15 0 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh rassilkiStats update --users=5461
+
+31 */6 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/mark_finished_anonses.php
+33 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/cache_anons.php shard1
+34 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/mailru.php
+
+# JUSTCLICK
+*/30 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/bill_cancel.php
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/bill_create.php
+1 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/lead_confirm.php
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/rss.php
+* * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php -f /home/justclick/htdocs/backend/cron_task_math.php > /dev/null 2>&1
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh Recurrent pay
+
+# SMS
+*/10 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh sms send
+28,54 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh sms getstatus
+11 5 * * *  /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh sms exclude_not_delivered
+
+# Partner Stat
+# exclude=1 else admin stat = 0
+28 4 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats partner --days=5 --exclude=1
+28 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats fix --days=5000
+
+# Удаление несуществующих по базе JC_mail_logs
+8,23,38,53 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh leadInvalid setinvalid 15 10
+
+# Автоимпорт расходов из Яндекс.Директ для utm-меток
+15 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh import yandex
+
+# Автоочистка базы от неактивных подписчиков
+0 3 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh UnsubLeads checkLeads
+0 5 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh UnsubLeads checkUnsubLeads
+
+# Определение города по ip
+*/30 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh LeadCity getByIP
+
+# Очистка таблиц активности
+0 8 * * 6 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh Activity removeOld
+
+# Обновление статистики и рейтинга каталога партнерок JustClick
+0 6 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh fillStats newStats
+
+# Удаление подписчиков, которые не принадлежат ни одной группе
+0 4 * * 6 /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh LeadInvalid removeLeadsWithoutGroup
+
+# Обновление Geo баз
+0 0 1 * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/geo_updater.sh
+
+# Обновление автогрупп неактивных
+0 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh AutogroupActivity update >> /home/justclick/htdocs/data/logs/autogroup_activity.log
+
+# Контролируем работу консьюмеров
+*/5 * * * * cd '/home/justclick/htdocs' && /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %>  /home/justclick/htdocs/backend/bin/run_killed_consumers.sh
+
+# JustPay заявка со статусом "Подключен, ожидание оригиналов" > 14 дней висит - отключаем
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh CheckJustpayConfig check
+
+# Блокировка за спам #1727
+16 1 * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /home/justclick/htdocs/backend/bin/cli.sh Spam blockSpamUsers
+
+# ClearOldCcTaskEditings #3520
+*/45 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> <%= release_path %>/backend/bin/cli.sh ClearOldCcTaskEditings
+
+# Напоминания оплаты
+*/15 * * * * /usr/bin/env SYMFONY_ENV=<%= fetch(:symfony_env) %> /usr/bin/php /home/justclick/htdocs/backend/mail_notify.php --letters=k
